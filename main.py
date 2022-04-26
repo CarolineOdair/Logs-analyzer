@@ -1,20 +1,28 @@
+import argparse
 import pandas as pd
 
 from filter import LogsFilter
 from grouper import TimeGrouper
 
+def main():
+    # args setup
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path", help="path of a file with logs")
+    args = parser.parse_args()
 
-if __name__ == "__main__":
-    # --------------------- #
-    # crucial, variable data:
-    file_path = "out.log"
+    # most often changed variables
     encoding = "utf-16"
     time_interval = "D"
-    # --------------------- #
 
-    with open(file_path, "r", encoding=encoding) as f:
+    with open(args.path, "r", encoding=encoding) as f:
         lines = f.readlines()
 
+    data_df = interpret_data(lines, time_interval)
+
+    # save in csv file
+    data_df.to_csv("entries_by_day.csv", index=False) # date and number of visitors
+
+def interpret_data(lines, time_interval):
     # clean data
     data = LogsFilter(lines)
     filtered_data = data.get_filtered_data()
@@ -26,8 +34,11 @@ if __name__ == "__main__":
     # group data into wanted time intervals
     time_grouper = TimeGrouper(data=df, freq=time_interval)
     time_modified_df = time_grouper.get_grouped_data()
-    # new_df = time_grouper.get_records_between_dates(log_time_modified_df, "2021/10/18", "2021-10-26")
 
-    # save in csv file
-    df.to_csv("requests_full_info.csv", index=False) # info about every request
-    time_modified_df.to_csv("entries_by_day.csv", index=False) # date and number of visitors
+    # if information only about specified period of time is wanted, not about entire one in a file
+    # specified_time_df = time_grouper.get_records_between_dates(time_modified_df, "2022/04/18", "2022-04-22")
+
+    return time_modified_df
+
+if __name__ == "__main__":
+    main()

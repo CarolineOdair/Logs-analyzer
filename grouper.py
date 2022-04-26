@@ -45,7 +45,7 @@ class TimeGrouper:
         df = df.reset_index(name="ips")
         return df
 
-    def count_ip_occurrences(self, cell:list) -> Counter:
+    def count_ip_occurrences(self, cell:list) -> list:
         """ Count number of every ip occurrence in the cell """
         c = Counter(cell)
         c = [(key, val) for key, val in c.items() if val > self.MIN_REQUESTS]
@@ -60,10 +60,10 @@ class TimeGrouper:
         Modify df to its final form - [date], [ips and number of their requests] and [number of ips]
         """
         df["ips"] = df["ips"].apply(self.count_ip_occurrences)
-        df["ip_number"] = df["ips"].apply(self.get_number_of_ip_in_cell)
+        df["ips_number"] = df["ips"].apply(self.get_number_of_ip_in_cell)
         return df
 
-    def get_records_between_dates(self, df, start, end) -> DataFrame:
+    def get_records_between_dates(self, df:DataFrame, start:str, end:str) -> DataFrame:
         """
         Return new df containing only records between given dates.
         start, end - dates writen in pandas friendly format
